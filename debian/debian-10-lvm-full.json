@@ -1,0 +1,82 @@
+{
+  "builders": [
+    {
+      "CPUs": 1,
+      "RAM": 1024,
+      "RAM_reserve_all": true,
+      "boot_wait": "15s",
+      "boot_command": [
+        "<esc><wait>",
+        "install ",
+        " preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/debian/preseed-debian-10-lvm-full.cfg ",
+        "debian-installer=en_US.UTF-8 ",
+        "auto ",
+        "locale=en_US.UTF-8 ",
+        "kbd-chooser/method=fr ",
+        "keyboard-configuration/xkb-keymap=fr ",
+        "fb=false ",
+        "debconf/frontend=noninteractive ",
+        "console-setup/ask_detect=false ",
+        "grub-installer/bootdev=/dev/sda ",
+        "netcfg/disable_autoconfig=true ",
+        "netcfg/confirm_static=true ",
+        "netcfg/get_ipaddress={{ user `prefix`}}.101 ",
+        "netcfg/get_netmask=255.255.255.0 ",
+        "netcfg/get_gateway={{ user `prefix`}}.1 ",
+        "netcfg/get_nameservers={{ user `prefix`}}.53 ",
+        "netcfg/get_hostname=debian10lvmfull ",
+        "netcfg/get_domain={{ user `DOMAIN` }} ",
+        "<enter><wait>"
+      ],
+      "cluster": "{{user `VCENTER_CLUSTER`}}",
+      "convert_to_template": true,
+      "datastore": "{{user `VCENTER_DATASTORE`}}",
+      "disk_controller_type": "pvscsi",
+      "folder": "{{user `VCENTER_FOLDER`}}",
+      "guest_os_type": "ubuntu64Guest",
+      "http_directory": ".",
+      "insecure_connection": "{{user `VCENTER_SSL_UNVERIFIED`}}",
+      "iso_paths": [
+        "[vsanDatastore] ISO/debian-10.6.0-amd64-netinst.iso"
+      ],
+      "iso_url": "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-10.6.0-amd64-netinst.iso",
+      "iso_checksum": "file:debian/SHA512SUMS",
+      "network_adapters": [
+        {
+          "network": "{{user `TPL_NETWORK`}}",
+          "network_card": "vmxnet3"
+        }
+      ],
+      "notes": "packer build template",
+      "password": "{{user `password`}}",
+      "resource_pool": "{{user `VCENTER_RESOURCE_POOL`}}",
+      "ssh_password": "packer",
+      "ssh_username": "packer",
+      "storage": [
+        {
+          "disk_size": 40960,
+          "disk_thin_provisioned": true
+        }
+      ],
+      "type": "vsphere-iso",
+      "username": "{{user `username`}}",
+      "vcenter_server": "{{user `VCENTER_SRV`}}",
+      "vm_name": "debian-10-lvm-full"
+    }
+  ],
+  "provisioners": [
+    {
+      "playbook_file": "customization/keyboard-fr.yml",
+      "type": "ansible"
+    },
+    {
+      "playbook_file": "customization/upgrade.yml",
+      "type": "ansible"
+    }
+  ],
+  "variables": {
+    "password": "{{env `VCENTER_PASS`}}",
+    "username": "{{env `VCENTER_LOGIN`}}",
+    "prefix": "{{user `TPL_PREFIX_NETWORK`}}"
+  }
+}

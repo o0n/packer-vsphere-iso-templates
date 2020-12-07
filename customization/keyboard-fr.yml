@@ -1,0 +1,6 @@
+---
+- hosts: all
+  roles:
+    - role: ansible-role-keyboard
+      keyboard_model: pc105
+      keyboard_layout: fr
